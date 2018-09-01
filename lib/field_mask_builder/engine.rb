@@ -13,7 +13,6 @@ module FieldMaskBuilder
       @fields = fields
     end
 
-    # @param [<Symbol | { Symbol => Array }>] fields
     # @return [<String>]
     def build
       r = []
@@ -22,7 +21,7 @@ module FieldMaskBuilder
         when Symbol, String
           r.push(f.to_s)
         when Hash
-          r += to_fields(f)
+          r += to_field_mask_paths(f)
         else
           raise "f must be Symbol or String or Hash, but got #{f}"
         end
@@ -32,9 +31,9 @@ module FieldMaskBuilder
 
   private
 
-    # @param [{ Symbol => <Symbol | Hash> }] hash
+    # @param [Hash] hash
     # @return [<String>]
-    def to_fields(hash)
+    def to_field_mask_paths(hash)
       r = []
       hash.each do |entity, fields|
         Helper.to_array(fields).each do |f|
@@ -42,7 +41,7 @@ module FieldMaskBuilder
           when Symbol, String
             r.push("#{entity}.#{f}")
           when Hash
-            r += to_fields(f).map { |_f| "#{entity}.#{_f}" }
+            r += to_field_mask_paths(f).map { |p| "#{entity}.#{p}" }
           else
             raise "f must be Symbol or String or Hash, but got #{f}"
           end
